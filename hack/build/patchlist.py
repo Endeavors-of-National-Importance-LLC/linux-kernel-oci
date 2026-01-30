@@ -3,11 +3,16 @@ import sys
 from packaging.version import parse
 
 from matrix import CONFIG
-from util import matches_constraints, maybe
+from util import matches_constraints, maybe, git_root
+from pathlib import Path
 
 if len(sys.argv) != 3:
     print("Usage: patchlist <KERNEL_VERSION> <KERNEL_FLAVOR>")
     exit(1)
+
+PATCHES_PATH = Path("patches")
+if (top_dir := git_root(Path(__file__).parent)) is not None:
+    PATCHES_PATH = top_dir / PATCHES_PATH
 
 target_version = parse(sys.argv[1])
 kernel_flavor = sys.argv[2]
@@ -43,4 +48,4 @@ for patch in patches:
 apply_patches.sort(key=lambda p: p["order"])
 
 for patch in apply_patches:
-    print("patches/%s" % patch["patch"])
+    print((PATCHES_PATH / patch["patch"]).resolve())

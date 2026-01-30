@@ -1,6 +1,6 @@
-from typing import Optional
-
 from packaging.version import Version
+from pathlib import Path
+from typing import Optional
 import subprocess
 
 
@@ -168,3 +168,18 @@ def smart_script_split(
             line += " \\"
         lines.append(line)
     return lines
+
+def git_root(start_path: Path | None) -> Path:
+    if start_path is not None and start_path.is_file():
+        start_path = start_path.parent
+    try:
+        result = subprocess.run(
+            ['git', 'rev-parse', '--show-toplevel'],
+            cwd=start_path,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return Path(result.stdout.strip())
+    except subprocess.CalledProcessError:
+        return None

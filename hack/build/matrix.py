@@ -1,23 +1,48 @@
+# matrix.py assumes the existence of config.yaml in the directory
+# from which it is invoked
+
 import json
-import os
+import os,sys
 
 import yaml
 import subprocess
 import urllib.request
 from collections import OrderedDict
 from functools import cache
+from pathlib import Path
 
 from packaging.version import Version, parse
 
-from util import matches_constraints, list_rsync_dir, format_image_name
+from util import matches_constraints, list_rsync_dir, format_image_name, git_root
 
 try:
     from yaml import CLoader as Loader
 except ImportError:
     from yaml import Loader
 
-with open("config.yaml", "r") as f:
-    CONFIG = yaml.load(f, Loader)
+CONFIG_FNAME = "config.yaml"
+
+# look in CWD else in git root dir if exists, else quit
+@cache
+def load_config(name=CONFIG_FNAME):
+    config_path = Path(name)
+    try:
+        with open(config_path.resolve(), "r") as f:
+            return yaml.load(f, Loader)
+    except FileNotFoundError:
+        if (top_dir := git_root(Path(__file__).parent)) is not None:
+            config_path = top_dir / name
+            try:
+                with open(config_path.resolve(), "r") as f:
+                    return yaml.load(f, Loader)
+            except FileNotFoundError:
+                pass
+        return None
+
+
+if (CONFIG := load_config()) is None:
+    print(f"Error loading {CONFIG_FNAME}", file=sys.stderr)
+    sys.exit(1)
 
 image_name_format = CONFIG["imageNameFormat"]
 
