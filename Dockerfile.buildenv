@@ -7,7 +7,7 @@
 # a schedule (see .github/workflows/buildenv.yml); the kernel Dockerfile pins
 # it by digest and dependabot proposes bumps as reviewable PRs.
 
-FROM debian:bookworm@sha256:9344f8b8992482f80cba753f323adeaf17690076c095ccff6cc9536be98185dc
+FROM debian:bookworm@sha256:6ebd97fa83deb272194a2cf015b3d26a4d538e9ad3a7a79d544c8af5b0a01443
 
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y \
       build-essential squashfs-tools python3-yaml \
